@@ -9,6 +9,23 @@ import { Eye, EyeOff, AlertCircle, ArrowRight, Sparkles, Shield, Users, Palette 
 import { useTranslation } from 'react-i18next'
 import Image from 'next/image'
 
+// Error codes set by the OAuth callback routes (?error=...) and their default
+// messages. Translations can override them via auth.oauthErrors.<code>.
+const OAUTH_ERROR_MESSAGES: Record<string, string> = {
+  oauth_failed: 'Sign-in was cancelled or failed. Please try again.',
+  access_denied: 'Sign-in was cancelled. Please try again when you are ready.',
+  no_code: 'The sign-in provider did not return an authorization code. Please try again.',
+  code_expired: 'That sign-in attempt expired or was already used. Please start again.',
+  email_unverified: 'Your account email address is not verified, so we cannot sign you in with it.',
+  server_config: 'Social sign-in is not configured correctly on the server. Please contact support.',
+  auth_failed: 'We could not create or find your account. Please try again or sign in with email and password.',
+  profile_failed: 'We could not set up your profile. Please try again.',
+  database_error: 'We could not reach the database. Please try again in a moment.',
+  session_failed: 'Your account was verified but we could not start a session. Please try again.',
+  unknown_error: 'Something went wrong while signing in. Please try again.',
+  callback_failed: 'Something went wrong while signing in. Please try again.',
+}
+
 export default function SignIn() {
   const { t } = useTranslation()
   const [email, setEmail] = useState('')
@@ -33,6 +50,21 @@ export default function SignIn() {
       }
     }
   }, [user, profile, router])
+
+  // Show why a social sign-in redirected back here (?error=<code>)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('error')
+    if (!code) return
+
+    const knownCode = code in OAUTH_ERROR_MESSAGES ? code : 'callback_failed'
+    setError(t(`auth.oauthErrors.${knownCode}`, { defaultValue: OAUTH_ERROR_MESSAGES[knownCode] }))
+
+    // Drop the param so a refresh does not show a stale error
+    params.delete('error')
+    const query = params.toString()
+    window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''))
+  }, [t])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

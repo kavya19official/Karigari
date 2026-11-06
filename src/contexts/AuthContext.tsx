@@ -60,6 +60,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const initializeAuth = async () => {
       try {
+        // A real Supabase session (e.g. from the Google sign-in link) always wins over
+        // any stale legacy session left in localStorage; otherwise the old entry would
+        // shadow a successful login.
+        const { data: { session: supabaseSession } } = await supabase.auth.getSession()
+        console.log('Initial Supabase session check:', supabaseSession?.user?.id)
+        if (supabaseSession?.user) {
+          localStorage.removeItem('googleUserSession')
+          localStorage.removeItem('microsoftUserSession')
+          setSession(supabaseSession)
+          setUser(supabaseSession.user)
+          await fetchProfile(supabaseSession.user.id)
+          // Sync anonymous cart if any exists (for restored sessions)
+          await syncAnonymousCartToDatabase(supabaseSession.user.id)
+          authInitializedRef.current = true
+          setLoading(false)
+          return
+        }
+
         // Check for Google user session in localStorage (client-side only)
         const googleSession = localStorage.getItem('googleUserSession')
         if (googleSession) {
@@ -98,21 +116,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        // Get initial Supabase session
-        const { data: { session } } = await supabase.auth.getSession()
-        console.log('Initial Supabase session check:', session?.user?.id)
-        if (session?.user) {
-          localStorage.removeItem('googleUserSession')
-          localStorage.removeItem('microsoftUserSession')
-        }
-        setSession(session)
-        setUser(session?.user ?? null)
-
-        if (session?.user) {
-          await fetchProfile(session.user.id)
-          // Sync anonymous cart if any exists (for restored sessions)
-          await syncAnonymousCartToDatabase(session.user.id)
-        }
+        // No Supabase session and no usable legacy session: signed out
+        setSession(null)
+        setUser(null)
         authInitializedRef.current = true
         setLoading(false)
       } catch (error) {
@@ -371,7 +377,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       window.location.href = authUrl
     } catch (error) {
       console.error('Error signing in with Google:', error)
-      throw new Error('Google sign in failed. Please try again.')
+      // Keep our own explanatory errors (e.g. "not configured"); hide anything else
+      throw error instanceof Error && error.name === 'GoogleOAuthError'
+        ? error
+        : new Error('Google sign in failed. Please try again.')
     }
   }
 

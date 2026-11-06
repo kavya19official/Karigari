@@ -20,20 +20,9 @@ function DashboardContent() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    // Handle Google session from OAuth callback
-    const googleSession = searchParams.get('google_session')
-    if (googleSession) {
-      try {
-        const googleUser = JSON.parse(decodeURIComponent(googleSession))
-        localStorage.setItem('googleUserSession', JSON.stringify(googleUser))
-        console.log('Google session stored:', googleUser)
-        // Reload the page to trigger auth context update
-        window.location.href = window.location.pathname
-        return
-      } catch (error) {
-        console.error('Error parsing Google session:', error)
-      }
-    }
+    // Google sign-in now creates a real Supabase session in the callback, so the old
+    // `?google_session=` query parameter is no longer accepted (it let any link
+    // plant an arbitrary identity in localStorage).
 
     // Handle Microsoft session from OAuth callback
     const microsoftSession = searchParams.get('microsoft_session')
