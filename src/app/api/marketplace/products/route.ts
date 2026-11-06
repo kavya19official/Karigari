@@ -1,10 +1,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_ADMIN_KEY } from '@/lib/supabase-env'
 
 // Initialize Supabase client (replace with your env variables or config)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = SUPABASE_URL;
+const supabaseKey = SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 const responseCache = new Map<string, { data: any; ts: number }>();
 const RESPONSE_CACHE_TTL_MS = 1000 * 60 * 10; // 10 minutes
@@ -235,7 +236,7 @@ export async function GET(req: NextRequest) {
 }
 
 // Bypassing RLS for Google/Microsoft OAuth users who lack a Supabase auth session
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseServiceKey = SUPABASE_ADMIN_KEY;
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function POST(req: NextRequest) {

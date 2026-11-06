@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod';
 import { auctionRateLimit } from '@/lib/rate-limit';
 import { localRateLimit } from '@/lib/local-limit';
+import { SUPABASE_URL, SUPABASE_ADMIN_KEY } from '@/lib/supabase-env'
 
 const bidSchema = z.object({
   auction_id: z.string().uuid(),
@@ -71,8 +72,8 @@ export async function POST(req: Request) {
     if (amount <= highest) return NextResponse.json({ error: 'bid must be higher than current' }, { status: 400 })
 
     const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      SUPABASE_URL,
+      SUPABASE_ADMIN_KEY
     )
 
     const { error } = await supabaseAdmin.from('bids').insert({ auction_id, bidder_id, amount })

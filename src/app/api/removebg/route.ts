@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase-env'
 
 export const runtime = 'nodejs';
 
@@ -17,8 +18,8 @@ export async function POST(req: NextRequest) {
 
     // Supabase client
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
     );
 
     // Fetch all API keys with usage_count < 50, sorted by usage_count descending

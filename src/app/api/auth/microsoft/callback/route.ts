@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { completeMicrosoftAuth } from '@/lib/microsoft-oauth'
 import { createClient } from '@supabase/supabase-js'
+import { SUPABASE_URL, SUPABASE_ADMIN_KEY } from '@/lib/supabase-env'
 
 // Create a Supabase client with service role key for server-side operations
 const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use service role key to bypass RLS
+  SUPABASE_URL,
+  SUPABASE_ADMIN_KEY, // Use service role key to bypass RLS
   {
     auth: {
       autoRefreshToken: false,
