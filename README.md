@@ -1,7 +1,7 @@
 
 <div align="center">
 
-<img src="public/karigari-logo.png" alt="Karigari logo" width="140" />
+
 
 # 🪔 Karigari
 
