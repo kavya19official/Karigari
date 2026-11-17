@@ -25,7 +25,7 @@ share reels, collaborate with each other and get help from AI agents.
 [🚀 Getting started](#-getting-started) •
 [🗄️ Database](#️-database) •
 [☁️ Deployment](#️-deployment) •
-[📄 Credits & licence](#-credits--licence)
+
 
 </div>
 
